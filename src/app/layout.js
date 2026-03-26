@@ -13,8 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Balance Tracker",
-  description: "Simple balance tracking application",
+  title: "Black Army",
+  description: "Ultras Black Army Treasury",
+  icons: {
+    icon: '/logo.jpg',
+  },
 };
 
 export default function RootLayout({ children }) {

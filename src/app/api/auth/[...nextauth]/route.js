@@ -19,13 +19,13 @@ const handler = NextAuth({
         try {
           await connectDB();
           const user = await User.findByEmail(credentials.email);
-          
+
           if (!user) {
             return null;
           }
 
           const isPasswordValid = await user.verifyPassword(credentials.password);
-          
+
           if (!isPasswordValid) {
             return null;
           }
