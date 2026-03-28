@@ -1,0 +1,122 @@
+================================================================================
+SECURITY AUDIT REPORT — Caisse / BA Treasury (Next.js + MongoDB + NextAuth)
+================================================================================
+Generated from codebase review. This document summarizes findings and
+recommended remediations. Severity labels reflect impact if the app is
+Internet-exposed without additional controls (e.g. VPN, IP allowlist).
+
+================================================================================
+CRITICAL
+================================================================================
+
+1) API routes are effectively public
+   - There is no middleware.js and route handlers do not call getServerSession
+     or verify JWT.
+   - Unauthenticated callers can invoke (non-exhaustive):
+     * GET/POST /api/users, GET/PUT/DELETE /api/users/[id]
+     * GET /api/balances, GET/POST /api/transactions, GET /api/analytics
+     * GET /api/transactions/by-zone, GET /api/transactions/sales
+     * GET /api/zones, GET /api/categories
+     * POST /api/seed
+   Impact: Treasury data can be read and modified without logging in. UI-only
+   redirects are not a security boundary.
+
+2) Open self-registration + unrestricted user API
+   - POST /api/users accepts role from the client body. Register page sends
+     role: 'user', but an attacker can POST directly with role: 'admin'.
+   Impact: Arbitrary admin account creation.
+
+3) User management without authentication
+   - GET /api/users lists users; PUT/DELETE /api/users/[id] modify or remove
+     accounts. Comments mention "admin only" but no enforcement exists.
+   Impact: User enumeration, privilege escalation, account deletion.
+
+4) Transaction attribution spoofing
+   - POST /api/transactions trusts userId from the JSON body; caller identity
+     is not verified.
+   Impact: Transactions can be attributed to other users; audit trail integrity
+   is broken.
+
+5) POST /api/seed unauthenticated
+   - Anyone can trigger database seeding. Low severity if idempotent, but it
+     remains an unauthenticated write and should be restricted or removed in
+   production.
+
+================================================================================
+HIGH
+================================================================================
+
+6) Proof images: size and storage
+   - proofImage is stored as a long base64 string in MongoDB with no
+     server-side size cap.
+   Impact: DoS (large documents, slow queries), cost, possible MongoDB document
+   size limits on a single Balance document.
+
+7) Weak password policy
+   - User model allows minimum password length 4.
+   Impact: Easier credential guessing if registration remains open.
+
+8) Information disclosure in errors
+   - APIs often return error.message to the client (Mongo/Mongoose messages).
+   Impact: Assists attackers in mapping schema and infrastructure; use generic
+   messages in production.
+
+9) /test-api in production
+   - If deployed, provides a convenient UI to exercise user/transaction APIs.
+   Impact: Should be removed or protected (auth + non-production only).
+
+================================================================================
+MEDIUM
+================================================================================
+
+10) No rate limiting
+    - Login and sensitive POST endpoints are vulnerable to brute force at the
+      application layer.
+
+11) Logging sensitive context
+    - console.log in POST /api/transactions may leak business context into logs.
+
+12) NextAuth production hygiene
+    - Use strong NEXTAUTH_SECRET, correct NEXTAUTH_URL, HTTPS-only cookies in
+      production. Middleware is still required for API protection.
+
+13) Client-only route "protection"
+    - Dashboard/analytics use useEffect redirects; API callers ignore this.
+
+================================================================================
+LOWER / DEFENSE IN DEPTH
+================================================================================
+
+- CORS: primary risk today is direct API abuse, not cross-site browser CSRF,
+  given same-origin fetches; re-evaluate when APIs enforce session cookies.
+- Run npm audit regularly; keep Next.js and dependencies patched.
+- MongoDB Atlas: IP allowlist and least-privilege DB user for the application.
+
+================================================================================
+POSITIVE FINDINGS
+================================================================================
+
+- Passwords hashed with bcrypt (User pre-save hook).
+- User reads use .select('-password') where applied.
+- Mongoose validation on amounts, types, and enums.
+- Mongo connection caching in lib/mongodb.js (helpful for serverless).
+
+================================================================================
+PRIORITY REMEDIATION (SHORT LIST)
+================================================================================
+
+1. Add middleware or per-route getServerSession; require authentication for all
+   non-auth API routes.
+2. Do not trust userId from the request body on POST /api/transactions — derive
+   from the authenticated session.
+3. Lock down /api/users: restrict creation to admins; never allow anonymous
+   clients to set role; or disable public registration and provision accounts
+   only as admin.
+4. Cap proofImage size server-side; consider object storage instead of embedded
+   base64 in the Balance document.
+5. Remove or gate /test-api and POST /api/seed in production.
+6. Strengthen password policy; add rate limiting on auth and sensitive POSTs.
+
+================================================================================
+END OF REPORT
+================================================================================

@@ -26,23 +26,35 @@ export async function GET(request) {
 
     let transactions = balance.transactions;
 
-    // Filter by type if provided
     if (type) {
-      transactions = balance.getTransactionsByType(type);
+      transactions = transactions.filter(t => t.type === type);
     }
 
-    // Filter by date range if provided
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      transactions = balance.getTransactionsByDateRange(start, end);
+      transactions = transactions.filter(t => {
+        const d = new Date(t.createdAt);
+        return d >= start && d <= end;
+      });
     }
+
+    const credits = balance.transactions.filter(t => t.type === 'credit');
+    const debits = balance.transactions.filter(t => t.type === 'debit');
+    const summary = {
+      currentBalance: balance.currentBalance,
+      totalCredits: credits.reduce((s, t) => s + t.amount, 0),
+      totalDebits: debits.reduce((s, t) => s + t.amount, 0),
+      transactionCount: balance.transactions.length,
+      creditCount: credits.length,
+      debitCount: debits.length,
+    };
 
     return NextResponse.json({
       success: true,
       data: transactions,
       count: transactions.length,
-      summary: balance.getBalanceSummary()
+      summary,
     });
   } catch (error) {
     return NextResponse.json(
@@ -57,7 +69,8 @@ export async function POST(request) {
   try {
     await connectDB();
     const body = await request.json();
-    const { amount, type, reason, userId } = body;
+    const { amount, type, reason, userId, category, zone, proofImage } = body;
+    console.log('[POST /api/transactions]', { category, zone, reason });
 
     // Validation
     if (!amount || !type || !reason || !userId) {
@@ -85,20 +98,27 @@ export async function POST(request) {
     const balance = await Balance.getOrCreateGlobalBalance();
 
     // Add transaction
-    await balance.addTransaction(amount, type, reason, userId);
+    await balance.addTransaction(amount, type, reason, userId, category, zone, proofImage);
 
     // Get updated balance with populated user info
     const updatedBalance = await Balance.getGlobalBalance();
 
     const newTransaction = updatedBalance.transactions[updatedBalance.transactions.length - 1];
 
+    const credits = updatedBalance.transactions.filter(t => t.type === 'credit');
+    const debits = updatedBalance.transactions.filter(t => t.type === 'debit');
+    const summary = {
+      currentBalance: updatedBalance.currentBalance,
+      totalCredits: credits.reduce((s, t) => s + t.amount, 0),
+      totalDebits: debits.reduce((s, t) => s + t.amount, 0),
+      transactionCount: updatedBalance.transactions.length,
+      creditCount: credits.length,
+      debitCount: debits.length,
+    };
+
     return NextResponse.json({
       success: true,
-      data: {
-        transaction: newTransaction,
-        balance: updatedBalance.currentBalance,
-        summary: updatedBalance.getBalanceSummary()
-      },
+      data: { transaction: newTransaction, balance: updatedBalance.currentBalance, summary },
       message: 'Transaction added successfully'
     }, { status: 201 });
 

@@ -21,6 +21,20 @@ const transactionSchema = new mongoose.Schema({
     maxlength: [200, 'Reason cannot exceed 200 characters'],
     trim: true
   },
+  category: {
+    type: String,
+    default: 'Autres',
+    trim: true
+  },
+  zone: {
+    type: String,
+    default: 'Autres',
+    trim: true
+  },
+  proofImage: {
+    type: String,
+    default: null
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -45,24 +59,25 @@ const balanceSchema = new mongoose.Schema({
 });
 
 // Method to add a transaction
-balanceSchema.methods.addTransaction = function(amount, type, reason, userId) {
+balanceSchema.methods.addTransaction = function(amount, type, reason, userId, category, zone, proofImage) {
   if (type !== 'credit' && type !== 'debit') {
     throw new Error('Transaction type must be either "credit" or "debit"');
   }
 
-  // Convert amount to number to ensure proper arithmetic
   const numericAmount = parseFloat(amount);
-  
+
   if (isNaN(numericAmount) || numericAmount <= 0) {
     throw new Error('Transaction amount must be a valid number greater than 0');
   }
 
-  // Add transaction to the array
   this.transactions.push({
     amount: numericAmount,
     type,
     reason,
-    userId
+    userId,
+    category: category || 'Autres',
+    zone: zone || 'Autres',
+    proofImage: proofImage || null,
   });
 
   // Update current balance
@@ -108,7 +123,7 @@ balanceSchema.methods.getBalanceSummary = function() {
 
 // Static method to get the single global balance
 balanceSchema.statics.getGlobalBalance = function() {
-  return this.findOne().populate('transactions.userId', 'name email');
+  return this.findOne().populate('transactions.userId', 'name email').lean();
 };
 
 // Method to recalculate balance from transactions
@@ -141,7 +156,5 @@ balanceSchema.statics.getOrCreateGlobalBalance = function() {
 };
 
 const Balance = mongoose.models.Balance || mongoose.model('Balance', balanceSchema);
-const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
 
 export default Balance;
-export { Transaction };

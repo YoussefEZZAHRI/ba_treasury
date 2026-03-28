@@ -3,25 +3,21 @@
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+import Calendar from '@/components/Calendar';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell
 } from 'recharts';
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function AnalyticsPage() {
   const { data: session, status } = useSession();
@@ -29,10 +25,7 @@ export default function AnalyticsPage() {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [dateRange, setDateRange] = useState({
-    startDate: '',
-    endDate: ''
-  });
+  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -52,10 +45,8 @@ export default function AnalyticsPage() {
       const params = new URLSearchParams();
       if (dateRange.startDate) params.append('startDate', dateRange.startDate);
       if (dateRange.endDate) params.append('endDate', dateRange.endDate);
-      
       const response = await fetch(`/api/analytics?${params.toString()}`);
       const data = await response.json();
-      
       if (data.success) {
         setAnalyticsData(data.data);
       } else {
@@ -68,10 +59,7 @@ export default function AnalyticsPage() {
   };
 
   const handleDateChange = (field, value) => {
-    setDateRange(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setDateRange(prev => ({ ...prev, [field]: value }));
   };
 
   const resetDateRange = () => {
@@ -80,319 +68,225 @@ export default function AnalyticsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">Loading analytics...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto"></div>
+          <p className="mt-4 text-zinc-500 font-medium">Loading analytics...</p>
         </div>
       </div>
     );
   }
 
-  if (status === 'unauthenticated') {
-    return null;
-  }
+  if (status === 'unauthenticated') return null;
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
-  };
+  const formatCurrency = (value) => `${Number(value).toFixed(2)} DH`;
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
-    });
+  const tooltipStyle = {
+    backgroundColor: '#18181b',
+    border: '1px solid #3f3f46',
+    borderRadius: '8px',
+    color: '#fff',
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Analytics Dashboard
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400">
-              Balance trends and transaction insights
-            </p>
+    <div className="min-h-screen bg-black text-white">
+
+      {/* Header */}
+      <header className="border-b border-zinc-800 bg-black sticky top-0 z-10">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Image src="/logo.jpg" alt="Black Army" width={72} height={72} className="rounded-full border-2 border-red-700" />
+            <div className="flex flex-col justify-center">
+              <h1 className="text-2xl font-extrabold tracking-tight text-white">Analytics Dashboard</h1>
+              <p className="text-sm font-bold tracking-widest uppercase">
+                <span className="text-red-500">à la vie </span>
+                <span className="text-green-500">à la mort</span>
+              </p>
+            </div>
           </div>
-          <div className="flex gap-4">
-            <Button 
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:block text-sm font-bold bg-gradient-to-r from-red-500 via-white to-green-500 bg-clip-text text-transparent">
+              Hi, {session?.user?.name}
+            </span>
+            <Button
               onClick={() => router.push('/dashboard')}
               variant="outline"
+              className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm"
             >
-              Balance Dashboard
+              Dashboard
             </Button>
             {session?.user?.role === 'admin' && (
-              <Button 
+              <Button
                 onClick={() => router.push('/admin')}
                 variant="outline"
+                className="border-green-700 bg-black text-green-500 hover:bg-green-950 text-sm"
               >
-                Admin Panel
+                Admin
               </Button>
             )}
-            <Button 
+            <Button
               onClick={() => signOut({ callbackUrl: '/' })}
               variant="outline"
+              className="border-red-800 bg-black text-red-500 hover:bg-red-950 text-sm"
             >
               Sign Out
             </Button>
           </div>
         </div>
+      </header>
+
+      <main className="container mx-auto px-6 py-8 space-y-8">
 
         {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded-lg">
-            {error}
-          </div>
+          <div className="p-4 bg-red-950 border border-red-800 text-red-400 rounded-xl">{error}</div>
         )}
 
         {/* Date Range Filter */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Date Range Filter</CardTitle>
-            <CardDescription>
-              Filter analytics data by date range
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 items-end">
-              <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">Start Date</label>
-                <input
-                  type="date"
-                  value={dateRange.startDate}
-                  onChange={(e) => handleDateChange('startDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">End Date</label>
-                <input
-                  type="date"
-                  value={dateRange.endDate}
-                  onChange={(e) => handleDateChange('endDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <Button onClick={resetDateRange} variant="outline">
-                Reset
-              </Button>
+        <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-xl">
+          <h2 className="text-lg font-bold text-white mb-1">Date Range Filter</h2>
+          <p className="text-sm text-zinc-500 mb-4">Filter analytics data by date range</p>
+          <div className="flex flex-col sm:flex-row gap-4 items-end">
+            <div className="flex-1">
+              <label className="block text-sm text-zinc-400 mb-1.5">Start Date</label>
+              <Calendar
+                value={dateRange.startDate}
+                onChange={(v) => handleDateChange('startDate', v)}
+                placeholder="Start date"
+              />
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex-1">
+              <label className="block text-sm text-zinc-400 mb-1.5">End Date</label>
+              <Calendar
+                value={dateRange.endDate}
+                onChange={(v) => handleDateChange('endDate', v)}
+                placeholder="End date"
+              />
+            </div>
+            <Button
+              onClick={resetDateRange}
+              className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white"
+              variant="outline"
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
 
         {analyticsData && (
           <>
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-600">
-                    Current Balance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {formatCurrency(analyticsData.currentBalance)}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-600">
-                    Total Credits
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
-                    {formatCurrency(analyticsData.summary.totalCredits)}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-600">
-                    Total Debits
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-red-600">
-                    {formatCurrency(analyticsData.summary.totalDebits)}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-600">
-                    Net Change
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-2xl font-bold ${
-                    analyticsData.summary.netChange >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {formatCurrency(analyticsData.summary.netChange)}
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-xl">
+                <p className="text-sm text-zinc-500 uppercase tracking-wider">Current Balance</p>
+                <p className={`text-2xl font-extrabold mt-2 ${analyticsData.currentBalance < 0 ? 'text-red-500' : 'text-green-500'}`}>
+                  {formatCurrency(analyticsData.currentBalance)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-xl">
+                <p className="text-sm text-zinc-500 uppercase tracking-wider">Total Credits</p>
+                <p className="text-2xl font-extrabold mt-2 text-green-500">
+                  {formatCurrency(analyticsData.summary.totalCredits)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-xl">
+                <p className="text-sm text-zinc-500 uppercase tracking-wider">Total Debits</p>
+                <p className="text-2xl font-extrabold mt-2 text-red-500">
+                  {formatCurrency(analyticsData.summary.totalDebits)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-xl">
+                <p className="text-sm text-zinc-500 uppercase tracking-wider">Net Change</p>
+                <p className={`text-2xl font-extrabold mt-2 ${analyticsData.summary.netChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {formatCurrency(analyticsData.summary.netChange)}
+                </p>
+              </div>
             </div>
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Balance Trend Chart */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Balance Trend</CardTitle>
-                  <CardDescription>
-                    Daily balance changes over time
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={analyticsData.dailyData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="date" 
-                        tickFormatter={formatDate}
-                        tick={{ fontSize: 12 }}
-                      />
-                      <YAxis tickFormatter={(value) => `$${value}`} />
-                      <Tooltip 
-                        formatter={(value, name) => [formatCurrency(value), name]}
-                        labelFormatter={(label) => formatDate(label)}
-                      />
-                      <Legend />
-                      <Line 
-                        type="monotone" 
-                        dataKey="cumulativeBalance" 
-                        stroke="#8884d8" 
-                        strokeWidth={2}
-                        name="Balance"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-              {/* Daily Credits vs Debits */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Daily Credits vs Debits</CardTitle>
-                  <CardDescription>
-                    Daily transaction amounts by type
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={analyticsData.dailyData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="date" 
-                        tickFormatter={formatDate}
-                        tick={{ fontSize: 12 }}
-                      />
-                      <YAxis tickFormatter={(value) => `$${value}`} />
-                      <Tooltip 
-                        formatter={(value, name) => [formatCurrency(value), name]}
-                        labelFormatter={(label) => formatDate(label)}
-                      />
-                      <Legend />
-                      <Bar dataKey="credits" fill="#00C49F" name="Credits" />
-                      <Bar dataKey="debits" fill="#FF8042" name="Debits" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+              {/* Balance Trend */}
+              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-xl">
+                <h2 className="text-lg font-bold text-white mb-1">Balance Trend</h2>
+                <p className="text-sm text-zinc-500 mb-4">Daily balance changes over time</p>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={analyticsData.dailyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                    <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 11, fill: '#71717a' }} />
+                    <YAxis tickFormatter={(v) => `${v} DH`} tick={{ fontSize: 11, fill: '#71717a' }} />
+                    <Tooltip formatter={(v) => [formatCurrency(v), 'Balance']} labelFormatter={formatDate} contentStyle={tooltipStyle} />
+                    <Legend wrapperStyle={{ color: '#a1a1aa' }} />
+                    <Line type="monotone" dataKey="cumulativeBalance" stroke="#ef4444" strokeWidth={2} name="Balance" dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Credits vs Debits */}
+              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-xl">
+                <h2 className="text-lg font-bold text-white mb-1">Daily Credits vs Debits</h2>
+                <p className="text-sm text-zinc-500 mb-4">Daily transaction amounts by type</p>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={analyticsData.dailyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                    <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 11, fill: '#71717a' }} />
+                    <YAxis tickFormatter={(v) => `${v} DH`} tick={{ fontSize: 11, fill: '#71717a' }} />
+                    <Tooltip formatter={(v, name) => [formatCurrency(v), name]} labelFormatter={formatDate} contentStyle={tooltipStyle} />
+                    <Legend wrapperStyle={{ color: '#a1a1aa' }} />
+                    <Bar dataKey="credits" fill="#22c55e" name="Credits" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="debits" fill="#ef4444" name="Debits" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Monthly Overview */}
             {analyticsData.monthlyData.length > 0 && (
-              <Card className="mb-8">
-                <CardHeader>
-                  <CardTitle>Monthly Overview</CardTitle>
-                  <CardDescription>
-                    Monthly transaction summary
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={analyticsData.monthlyData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis tickFormatter={(value) => `$${value}`} />
-                      <Tooltip 
-                        formatter={(value, name) => [formatCurrency(value), name]}
-                      />
-                      <Legend />
-                      <Bar dataKey="credits" fill="#00C49F" name="Credits" />
-                      <Bar dataKey="debits" fill="#FF8042" name="Debits" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+              <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-xl">
+                <h2 className="text-lg font-bold text-white mb-1">Monthly Overview</h2>
+                <p className="text-sm text-zinc-500 mb-4">Monthly transaction summary</p>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={analyticsData.monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#71717a' }} />
+                    <YAxis tickFormatter={(v) => `${v} DH`} tick={{ fontSize: 11, fill: '#71717a' }} />
+                    <Tooltip formatter={(v, name) => [formatCurrency(v), name]} contentStyle={tooltipStyle} />
+                    <Legend wrapperStyle={{ color: '#a1a1aa' }} />
+                    <Bar dataKey="credits" fill="#22c55e" name="Credits" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="debits" fill="#ef4444" name="Debits" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             )}
 
-            {/* Transaction Count Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Transaction Activity</CardTitle>
-                <CardDescription>
-                  Daily transaction count
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={analyticsData.dailyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="date" 
-                      tickFormatter={formatDate}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value, name) => [value, name]}
-                      labelFormatter={(label) => formatDate(label)}
-                    />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="transactionCount" 
-                      stroke="#FFBB28" 
-                      strokeWidth={2}
-                      name="Transactions"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+            {/* Transaction Activity */}
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 shadow-xl">
+              <h2 className="text-lg font-bold text-white mb-1">Transaction Activity</h2>
+              <p className="text-sm text-zinc-500 mb-4">Daily transaction count</p>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={analyticsData.dailyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                  <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 11, fill: '#71717a' }} />
+                  <YAxis tick={{ fontSize: 11, fill: '#71717a' }} />
+                  <Tooltip formatter={(v) => [v, 'Transactions']} labelFormatter={formatDate} contentStyle={tooltipStyle} />
+                  <Legend wrapperStyle={{ color: '#a1a1aa' }} />
+                  <Line type="monotone" dataKey="transactionCount" stroke="#22c55e" strokeWidth={2} name="Transactions" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </>
         )}
 
         {analyticsData && analyticsData.dailyData.length === 0 && (
-          <Card>
-            <CardContent className="text-center py-12">
-              <p className="text-slate-500 text-lg">
-                No transaction data found for the selected date range.
-              </p>
-              <Button 
-                onClick={resetDateRange} 
-                variant="outline" 
-                className="mt-4"
-              >
-                View All Data
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-12 text-center shadow-xl">
+            <p className="text-zinc-500 text-lg mb-4">No transaction data found for the selected date range.</p>
+            <Button onClick={resetDateRange} className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900" variant="outline">
+              View All Data
+            </Button>
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

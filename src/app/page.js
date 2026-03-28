@@ -33,7 +33,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-            Balance Tracker
+            BA Treasury 
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400">
             Simple balance tracking for your team

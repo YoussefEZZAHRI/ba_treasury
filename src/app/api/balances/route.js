@@ -11,7 +11,8 @@ export async function GET() {
     // Initialize admin user on first API call
     await initializeAdmin();
     
-    const balance = await Balance.getOrCreateGlobalBalance();
+    await Balance.getOrCreateGlobalBalance();
+    const balance = await Balance.getGlobalBalance();
     
     return NextResponse.json({
       success: true,
