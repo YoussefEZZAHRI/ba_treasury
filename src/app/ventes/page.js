@@ -199,12 +199,14 @@ export default function VentesPage() {
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       {t.proofImage && (
-                        <img
-                          src={t.proofImage}
-                          alt="preuve"
-                          className="h-9 w-9 rounded-lg object-cover border border-zinc-700 cursor-pointer"
+                        <button
+                          type="button"
                           onClick={() => setPreviewImage(t.proofImage)}
-                        />
+                          className="rounded-lg border border-zinc-700 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                          aria-label="Voir la preuve"
+                        >
+                          <Image src={t.proofImage} alt="preuve" width={36} height={36} unoptimized className="h-9 w-9 object-cover" />
+                        </button>
                       )}
                       <span className="font-bold text-green-500 tabular-nums">+{t.amount} DH</span>
                     </div>
@@ -217,7 +219,7 @@ export default function VentesPage() {
         {zones.length === 0 && (
           <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-12 text-center">
             <p className="text-zinc-500 text-lg mb-2">Aucune vente enregistrée.</p>
-            <p className="text-zinc-600 text-sm">Ajoutez une transaction avec la catégorie "Vente de produit" depuis le dashboard.</p>
+            <p className="text-zinc-600 text-sm">Ajoutez une transaction avec la catégorie « Vente de produit » depuis le dashboard.</p>
           </div>
         )}
       </main>
@@ -225,7 +227,14 @@ export default function VentesPage() {
       {/* Image Preview Modal */}
       {previewImage && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={() => setPreviewImage(null)}>
-          <img src={previewImage} alt="preuve" className="max-h-[85vh] max-w-full rounded-2xl border border-zinc-700 shadow-2xl" />
+          <Image
+            src={previewImage}
+            alt="preuve"
+            width={1600}
+            height={1200}
+            unoptimized
+            className="max-h-[85vh] w-auto max-w-full h-auto rounded-2xl border border-zinc-700 shadow-2xl"
+          />
         </div>
       )}
     </div>

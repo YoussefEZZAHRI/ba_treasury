@@ -470,7 +470,14 @@ export default function Dashboard() {
                     className="w-full px-3 py-2 bg-black border border-zinc-700 rounded-lg text-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-700 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-zinc-300 file:text-sm"
                   />
                   {newTransaction.proofImage && (
-                    <img src={newTransaction.proofImage} alt="preview" className="mt-2 h-16 rounded-lg object-cover border border-zinc-700" />
+                    <Image
+                      src={newTransaction.proofImage}
+                      alt="preview"
+                      width={64}
+                      height={64}
+                      unoptimized
+                      className="mt-2 h-16 w-auto max-w-full rounded-lg object-cover border border-zinc-700"
+                    />
                   )}
                 </div>
               </div>
@@ -621,7 +628,7 @@ export default function Dashboard() {
                             className="mx-auto block rounded-lg border border-zinc-700 overflow-hidden ring-offset-2 ring-offset-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 hover:border-red-700/60 transition-colors"
                             aria-label="Voir la preuve"
                           >
-                            <img src={t.proofImage} alt="preuve" className="h-9 w-9 object-cover" />
+                            <Image src={t.proofImage} alt="preuve" width={36} height={36} unoptimized className="h-9 w-9 object-cover" />
                           </button>
                         ) : (
                           <span className="text-zinc-700">—</span>
@@ -693,10 +700,13 @@ export default function Dashboard() {
             </div>
 
             <div className="flex-1 overflow-auto p-4 sm:p-6 flex items-center justify-center bg-black/50 min-h-[200px]">
-              <img
+              <Image
                 src={proofPreview.src}
                 alt="Preuve en grand"
-                className="max-h-[min(70vh,720px)] w-auto max-w-full rounded-xl border border-zinc-800 object-contain shadow-2xl"
+                width={1600}
+                height={1200}
+                unoptimized
+                className="max-h-[min(70vh,720px)] w-auto max-w-full h-auto rounded-xl border border-zinc-800 object-contain shadow-2xl"
               />
             </div>
 
@@ -759,7 +769,14 @@ export default function Dashboard() {
               {newTransaction.proofImage && (
                 <div className="pt-1">
                   <span className="text-zinc-500 text-sm block mb-1">Preuve</span>
-                  <img src={newTransaction.proofImage} alt="preuve" className="h-20 rounded-lg object-cover border border-zinc-700" />
+                  <Image
+                    src={newTransaction.proofImage}
+                    alt="preuve"
+                    width={320}
+                    height={80}
+                    unoptimized
+                    className="h-20 w-auto max-w-full rounded-lg object-cover border border-zinc-700"
+                  />
                 </div>
               )}
             </div>

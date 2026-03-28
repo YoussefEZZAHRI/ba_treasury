@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -27,19 +27,7 @@ export default function AnalyticsPage() {
   const [error, setError] = useState('');
   const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    } else if (status === 'authenticated') {
-      fetchAnalytics();
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    fetchAnalytics();
-  }, [dateRange]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -54,9 +42,20 @@ export default function AnalyticsPage() {
       }
     } catch (error) {
       setError('Error fetching analytics data');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [dateRange.startDate, dateRange.endDate]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+    if (status === 'authenticated') {
+      fetchAnalytics();
+    }
+  }, [status, router, fetchAnalytics]);
 
   const handleDateChange = (field, value) => {
     setDateRange(prev => ({ ...prev, [field]: value }));
