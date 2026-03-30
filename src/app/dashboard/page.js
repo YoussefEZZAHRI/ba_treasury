@@ -286,10 +286,6 @@ export default function Dashboard() {
               <h1 className="text-2xl font-extrabold tracking-tight text-white">
                 Black Army Treasury
               </h1>
-              <p className="text-sm font-bold tracking-widest uppercase">
-                <span className="text-red-500">à la vie </span>
-                <span className="text-green-500">à la mort</span>
-              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">

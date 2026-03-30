@@ -46,10 +46,6 @@ export default function LoginPage() {
             className="rounded-full border-2 border-red-700 mx-auto mb-4"
           />
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Black Army Treasury</h1>
-          <p className="text-sm font-bold tracking-widest uppercase mt-1">
-            <span className="text-red-500">à la vie </span>
-            <span className="text-green-500">à la mort</span>
-          </p>
         </div>
 
         {/* Card */}

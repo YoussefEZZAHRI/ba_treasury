@@ -60,10 +60,6 @@ export default function ZonesPage() {
             <Image src="/logo.jpg" alt="Black Army" width={72} height={72} className="rounded-full border-2 border-red-700" />
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight text-white">Vue par Zone</h1>
-              <p className="text-sm font-bold tracking-widest uppercase">
-                <span className="text-red-500">à la vie </span>
-                <span className="text-green-500">à la mort</span>
-              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">

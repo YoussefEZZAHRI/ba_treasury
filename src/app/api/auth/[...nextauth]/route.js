@@ -66,7 +66,8 @@ const handler = NextAuth({
     signIn: '/login',
     signUp: '/register',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  // Production requires a secret. Vercel: set NEXTAUTH_SECRET (or AUTH_SECRET) in Project → Settings → Environment Variables.
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
 });
 
 export { handler as GET, handler as POST };
