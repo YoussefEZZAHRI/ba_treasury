@@ -13,16 +13,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Black Army",
-  description: "Ultras Black Army Treasury",
+  title: "Black Army Treasury",
+  description: "Gestion de la caisse - Ultras Black Army",
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'BA Treasury',
+  },
   icons: {
     icon: '/logo.jpg',
+    apple: '/logo.jpg',
   },
+  themeColor: '#000000',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#000000',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
