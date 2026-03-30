@@ -31,7 +31,9 @@ const userSchema = new mongoose.Schema({
       message: 'Role must be either "user" or "admin"'
     },
     default: 'user'
-  }
+  },
+  resetToken: { type: String, default: null },
+  resetTokenExpiry: { type: Date, default: null },
 }, {
   timestamps: true // This adds createdAt and updatedAt automatically
 });
