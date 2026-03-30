@@ -245,13 +245,11 @@ export default function VentesPage() {
       {/* Image Preview Modal */}
       {previewImage && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={() => setPreviewImage(null)}>
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={previewImage}
             alt="preuve"
-            width={1600}
-            height={1200}
-            unoptimized
-            className="max-h-[85vh] w-auto max-w-full h-auto rounded-2xl border border-zinc-700 shadow-2xl"
+            className="max-h-[85vh] w-auto max-w-full rounded-2xl border border-zinc-700 shadow-2xl object-contain"
           />
         </div>
       )}

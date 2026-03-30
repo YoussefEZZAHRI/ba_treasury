@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
   const handleChange = (field, value) => {
@@ -35,17 +36,24 @@ export default function RegisterPage() {
         return;
       }
 
-      const loginResult = await signIn('credentials', {
-        email: form.email,
-        password: form.password,
-        redirect: false,
-      });
+      try {
+        const loginResult = await signIn('credentials', {
+          email: form.email,
+          password: form.password,
+          redirect: false,
+        });
 
-      if (loginResult?.error) {
-        setError('Account created, but automatic sign in failed. Please sign in manually.');
-        router.push('/login');
-      } else {
-        router.push('/dashboard');
+        if (loginResult?.error) {
+          // Auto sign-in failed (common in PWA standalone mode) — show success and redirect to login
+          setSuccess(true);
+          setTimeout(() => router.push('/login'), 2000);
+        } else {
+          router.push('/dashboard');
+        }
+      } catch {
+        // signIn threw — still created the account, redirect to login
+        setSuccess(true);
+        setTimeout(() => router.push('/login'), 2000);
       }
     } catch {
       setError('An error occurred. Please try again.');
@@ -55,8 +63,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-black flex items-start justify-center p-4 pt-8 overflow-y-auto">
+      <div className="w-full max-w-md pb-8">
 
         {/* Logo + Title */}
         <div className="flex flex-col items-center mb-8">
@@ -73,6 +81,12 @@ export default function RegisterPage() {
 
         {/* Card */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+
+          {success && (
+            <div className="mb-4 p-3 bg-green-950 border border-green-800 text-green-400 rounded-xl text-sm text-center">
+              Compte créé ! Redirection vers la connexion...
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-400 rounded-xl text-sm">

@@ -740,12 +740,10 @@ export default function Dashboard() {
             </div>
 
             <div className="flex-1 overflow-auto p-4 sm:p-6 flex items-center justify-center bg-black/50 min-h-[200px]">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={proofPreview.src}
                 alt="Preuve en grand"
-                width={1600}
-                height={1200}
-                unoptimized
                 className="max-h-[min(70vh,720px)] w-auto max-w-full h-auto rounded-xl border border-zinc-800 object-contain shadow-2xl"
               />
             </div>
