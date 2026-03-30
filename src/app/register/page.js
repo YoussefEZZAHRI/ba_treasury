@@ -4,15 +4,10 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Image from 'next/image';
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -29,15 +24,8 @@ export default function RegisterPage() {
     try {
       const createRes = await fetch('/api/users', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-          role: 'user',
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role: 'user' }),
       });
 
       const createData = await createRes.json();
@@ -59,7 +47,7 @@ export default function RegisterPage() {
       } else {
         router.push('/dashboard');
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
     }
 
@@ -67,79 +55,94 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Create Account</CardTitle>
-          <CardDescription>Sign up to start tracking your balance</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+
+        {/* Logo + Title */}
+        <div className="flex flex-col items-center mb-8">
+          <Image
+            src="/logo.jpg"
+            alt="Black Army"
+            width={88}
+            height={88}
+            className="rounded-full border-2 border-red-700 mb-4"
+          />
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Black Army Treasury</h1>
+          <p className="text-sm text-zinc-500 mt-1">Créer un compte</p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-400 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-2">
-                Name
-              </label>
+              <label className="block text-sm text-zinc-400 mb-1.5">Nom</label>
               <input
-                id="name"
                 type="text"
                 value={form.name}
                 onChange={(e) => handleChange('name', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 bg-black border border-zinc-700 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-red-700"
+                placeholder="Votre nom"
                 required
                 minLength={2}
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2">
-                Email
-              </label>
+              <label className="block text-sm text-zinc-400 mb-1.5">Email</label>
               <input
-                id="email"
                 type="email"
                 value={form.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 bg-black border border-zinc-700 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-red-700"
+                placeholder="email@exemple.com"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
-                Password
-              </label>
+              <label className="block text-sm text-zinc-400 mb-1.5">Mot de passe</label>
               <input
-                id="password"
                 type="password"
                 value={form.password}
                 onChange={(e) => handleChange('password', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 bg-black border border-zinc-700 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-red-700"
+                placeholder="••••••••"
                 required
                 minLength={4}
               />
             </div>
 
-            {error && (
-              <div className="p-3 bg-red-100 border border-red-300 text-red-700 rounded-md">
-                {error}
-              </div>
-            )}
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Sign Up'}
-            </Button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 bg-red-700 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {loading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Création en cours...
+                </>
+              ) : 'Créer un compte'}
+            </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-slate-600">
-              Already have an account?{' '}
-              <Link href="/login" className="text-blue-600 hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          <p className="mt-6 text-center text-sm text-zinc-500">
+            Déjà un compte ?{' '}
+            <Link href="/login" className="text-green-500 hover:text-green-400 font-medium">
+              Se connecter
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
