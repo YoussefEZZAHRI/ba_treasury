@@ -15,6 +15,7 @@ export default function ZonesPage() {
   const [filter, setFilter] = useState('all'); // 'all' | 'credit' | 'debit'
   const [expandedZone, setExpandedZone] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
@@ -54,37 +55,49 @@ export default function ZonesPage() {
     <div className="min-h-screen bg-black text-white">
 
       {/* Header */}
-      <header className="border-b border-zinc-800 bg-black sticky top-0 z-10">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Image src="/logo.jpg" alt="Black Army" width={72} height={72} className="rounded-full border-2 border-red-700" />
-            <div>
-              <h1 className="text-2xl font-extrabold tracking-tight text-white">Vue par Zone</h1>
-            </div>
-          </div>
+      <header className="border-b border-zinc-800 bg-black sticky top-0 z-20">
+        <div className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <span className="hidden sm:block text-sm font-bold bg-gradient-to-r from-red-500 via-white to-green-500 bg-clip-text text-transparent">
+            <Image src="/logo.jpg" alt="Black Army" width={52} height={52} className="rounded-full border-2 border-red-700" />
+            <h1 className="text-lg sm:text-2xl font-extrabold tracking-tight text-white">Vue par Zone</h1>
+          </div>
+          <div className="hidden md:flex items-center gap-3">
+            <span className="text-sm font-bold bg-gradient-to-r from-red-500 via-white to-green-500 bg-clip-text text-transparent">
               Hi, {session?.user?.name}
             </span>
-            <Button onClick={() => router.push('/dashboard')} variant="outline" className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm">
-              Dashboard
-            </Button>
-            <Button onClick={() => router.push('/analytics')} variant="outline" className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm">
-              Analytics
-            </Button>
+            <Button onClick={() => router.push('/dashboard')} variant="outline" className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm">Dashboard</Button>
+            <Button onClick={() => router.push('/analytics')} variant="outline" className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm">Analytics</Button>
             {session?.user?.role === 'admin' && (
-              <Button onClick={() => router.push('/admin')} variant="outline" className="border-green-700 bg-black text-green-500 hover:bg-green-950 text-sm">
-                Admin
-              </Button>
+              <Button onClick={() => router.push('/admin')} variant="outline" className="border-green-700 bg-black text-green-500 hover:bg-green-950 text-sm">Admin</Button>
             )}
-            <Button onClick={() => signOut({ callbackUrl: '/' })} variant="outline" className="border-red-800 bg-black text-red-500 hover:bg-red-950 text-sm">
-              Sign Out
-            </Button>
+            <Button onClick={() => signOut({ callbackUrl: '/' })} variant="outline" className="border-red-800 bg-black text-red-500 hover:bg-red-950 text-sm">Sign Out</Button>
           </div>
+          <button className="md:hidden p-2 rounded-lg border border-zinc-700 text-zinc-300" onClick={() => setShowMobileMenu(m => !m)}>
+            {showMobileMenu
+              ? <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            }
+          </button>
         </div>
+        {showMobileMenu && (
+          <div className="md:hidden border-t border-zinc-800 bg-zinc-950 px-4 py-3 flex flex-col gap-2">
+            <p className="text-sm font-bold bg-gradient-to-r from-red-500 via-white to-green-500 bg-clip-text text-transparent mb-1">Hi, {session?.user?.name}</p>
+            {[
+              { label: 'Dashboard', path: '/dashboard' },
+              { label: 'Analytics', path: '/analytics' },
+              ...(session?.user?.role === 'admin' ? [{ label: 'Admin', path: '/admin', green: true }] : []),
+            ].map(item => (
+              <button key={item.path} onClick={() => { router.push(item.path); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium border ${item.green ? 'border-green-800 text-green-400' : 'border-zinc-700 text-zinc-300'} bg-black`}>
+                {item.label}
+              </button>
+            ))}
+            <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium border border-red-900 text-red-400 bg-black mt-1">Sign Out</button>
+          </div>
+        )}
       </header>
 
-      <main className="container mx-auto px-6 py-8 space-y-8">
+      <main className="container mx-auto px-4 sm:px-6 py-6 space-y-6">
 
         {error && <div className="p-4 bg-red-950 border border-red-800 text-red-400 rounded-xl">{error}</div>}
 

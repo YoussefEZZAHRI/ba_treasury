@@ -120,3 +120,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* PWA safe area: push sticky headers below the phone status bar */
+header.sticky {
+  padding-top: env(safe-area-inset-top);
+}
