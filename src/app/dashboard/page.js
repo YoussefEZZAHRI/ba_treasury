@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [sortDir, setSortDir] = useState('desc');
   const [proofPreview, setProofPreview] = useState(null);
   const [proofSaveHint, setProofSaveHint] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [newTransaction, setNewTransaction] = useState({
     amount: '',
     type: 'credit',
@@ -278,62 +279,74 @@ export default function Dashboard() {
     <div className="min-h-screen bg-black text-white">
 
       {/* Top Nav */}
-      <header className="border-b border-zinc-800 bg-black sticky top-0 z-10">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Image src="/logo.jpg" alt="Black Army" width={72} height={72} className="rounded-full border-2 border-red-700" />
-            <div className="flex flex-col justify-center">
-              <h1 className="text-2xl font-extrabold tracking-tight text-white">
-                Black Army Treasury
-              </h1>
-            </div>
-          </div>
+      <header className="border-b border-zinc-800 bg-black sticky top-0 z-20">
+        <div className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+          {/* Logo + Title */}
           <div className="flex items-center gap-3">
-            <span className="hidden sm:block text-sm font-bold bg-gradient-to-r from-red-500 via-white to-green-500 bg-clip-text text-transparent">
+            <Image src="/logo.jpg" alt="Black Army" width={52} height={52} className="rounded-full border-2 border-red-700" />
+            <h1 className="text-lg sm:text-2xl font-extrabold tracking-tight text-white leading-tight">
+              Black Army<br className="sm:hidden" /><span className="hidden sm:inline"> </span>Treasury
+            </h1>
+          </div>
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-3">
+            <span className="text-sm font-bold bg-gradient-to-r from-red-500 via-white to-green-500 bg-clip-text text-transparent">
               Hi, {session?.user?.name}
             </span>
-            <Button
-              onClick={() => router.push('/analytics')}
-              variant="outline"
-              className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm"
-            >
-              Analytics
-            </Button>
-            <Button
-              onClick={() => router.push('/zones')}
-              variant="outline"
-              className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm"
-            >
-              Par Zone
-            </Button>
-            <Button
-              onClick={() => router.push('/ventes')}
-              variant="outline"
-              className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm"
-            >
-              Ventes
-            </Button>
+            <Button onClick={() => router.push('/analytics')} variant="outline" className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm">Analytics</Button>
+            <Button onClick={() => router.push('/zones')} variant="outline" className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm">Par Zone</Button>
+            <Button onClick={() => router.push('/ventes')} variant="outline" className="border-zinc-700 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white text-sm">Ventes</Button>
             {session?.user?.role === 'admin' && (
-              <Button
-                onClick={() => router.push('/admin')}
-                variant="outline"
-                className="border-green-700 bg-black text-green-500 hover:bg-green-950 text-sm"
-              >
-                Admin
-              </Button>
+              <Button onClick={() => router.push('/admin')} variant="outline" className="border-green-700 bg-black text-green-500 hover:bg-green-950 text-sm">Admin</Button>
             )}
-            <Button
+            <Button onClick={() => signOut({ callbackUrl: '/' })} variant="outline" className="border-red-800 bg-black text-red-500 hover:bg-red-950 text-sm">Sign Out</Button>
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden p-2 rounded-lg border border-zinc-700 text-zinc-300"
+            onClick={() => setShowMobileMenu(m => !m)}
+          >
+            {showMobileMenu ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile dropdown menu */}
+        {showMobileMenu && (
+          <div className="md:hidden border-t border-zinc-800 bg-zinc-950 px-4 py-3 flex flex-col gap-2">
+            <p className="text-sm font-bold bg-gradient-to-r from-red-500 via-white to-green-500 bg-clip-text text-transparent mb-1">
+              Hi, {session?.user?.name}
+            </p>
+            {[
+              { label: 'Analytics', path: '/analytics' },
+              { label: 'Par Zone', path: '/zones' },
+              { label: 'Ventes', path: '/ventes' },
+              ...(session?.user?.role === 'admin' ? [{ label: 'Admin', path: '/admin', green: true }] : []),
+            ].map(item => (
+              <button
+                key={item.path}
+                onClick={() => { router.push(item.path); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium border ${item.green ? 'border-green-800 text-green-400' : 'border-zinc-700 text-zinc-300'} bg-black`}
+              >
+                {item.label}
+              </button>
+            ))}
+            <button
               onClick={() => signOut({ callbackUrl: '/' })}
-              variant="outline"
-              className="border-red-800 bg-black text-red-500 hover:bg-red-950 text-sm"
+              className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium border border-red-900 text-red-400 bg-black mt-1"
             >
               Sign Out
-            </Button>
+            </button>
           </div>
-        </div>
+        )}
       </header>
 
-      <main className="container mx-auto px-6 py-8 space-y-8">
+      <main className="container mx-auto px-4 sm:px-6 py-6 space-y-6">
 
         {error && (
           <div className="p-4 bg-red-950 border border-red-800 text-red-400 rounded-xl">
@@ -492,7 +505,7 @@ export default function Dashboard() {
         {/* Transactions List */}
         <div className="rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl overflow-hidden">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-6 border-b border-zinc-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-6 border-b border-zinc-800">
             <div>
               <h2 className="text-lg font-bold text-white">Recent Transactions</h2>
               <p className="text-sm text-zinc-500">
@@ -539,7 +552,7 @@ export default function Dashboard() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap gap-3 px-6 py-4 border-b border-zinc-800 bg-zinc-950/50">
+          <div className="flex flex-wrap gap-2 px-4 sm:px-6 py-3 border-b border-zinc-800 bg-zinc-950/50">
             <select
               value={filterCategory}
               onChange={e => setFilterCategory(e.target.value)}
@@ -575,8 +588,39 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
+          {/* Mobile card list */}
+          <div className="md:hidden divide-y divide-zinc-800">
+            {transactions.length === 0 ? (
+              <p className="text-zinc-600 text-center py-12 px-4">No transactions yet. Add your first one!</p>
+            ) : filteredTransactions.length === 0 ? (
+              <p className="text-zinc-600 text-center py-12 px-4">Aucun résultat pour ces filtres.</p>
+            ) : filteredTransactions.map((t, i) => (
+              <div key={i} className="px-4 py-3 flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-white text-sm truncate">{t.reason}</p>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    {new Date(t.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {t.userId?.name ? ` · ${t.userId.name}` : ''}
+                  </p>
+                  <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                    {t.category && <span className="text-xs bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-full">{t.category}</span>}
+                    {t.zone && <span className="text-xs bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-full">{t.zone}</span>}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {t.proofImage && (
+                    <img src={t.proofImage} alt="preuve" className="h-9 w-9 rounded-lg object-cover border border-zinc-700 cursor-pointer" onClick={() => setProofPreview(t.proofImage)} />
+                  )}
+                  <span className={`font-bold text-sm tabular-nums ${t.type === 'credit' ? 'text-green-500' : 'text-red-500'}`}>
+                    {t.type === 'credit' ? '+' : '-'}{t.amount} DH
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             {transactions.length === 0 ? (
               <p className="text-zinc-600 text-center py-12">No transactions yet. Add your first one!</p>
             ) : filteredTransactions.length === 0 ? (
